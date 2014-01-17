@@ -1,0 +1,8 @@
+This project repackages statsite, a C implementation of statsd, into a reusable
+library. This allows its statistics functions to be reused in other programs.
+
+To pull the latest version of statsite into this project, run the 'update.sh'
+script.
+
+See the original project: https://github.com/armon/statsite if you want to run
+the statsite daemon and for documentation on that.

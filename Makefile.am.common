@@ -1,0 +1,1 @@
+AM_CPPFLAGS = -iquote $(top_srcdir)/include/statsite -I$(top_srcdir)/include
