@@ -1,4 +1,3 @@
-AC_INIT([libstatsite], [0.6.1])
 AM_INIT_AUTOMAKE
 AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_CC
