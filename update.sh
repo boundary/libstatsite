@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # resync this library with the upstream project
 
@@ -41,3 +41,5 @@ pushd include
 popd
 
 rm -fr statsite
+
+git co include/statsite/MurmurHash3.h src/MurmurHash3.c
