@@ -15,7 +15,7 @@ for i in deps/murmurhash deps/inih src; do
 	cp statsite/$i/*.h include/statsite
 done
 
-for i in conn_handler networking statsite streaming; do
+for i in config conn_handler networking statsite streaming; do
 	rm -f src/$i.c;
 	rm -f include/statsite/$i.h
 done

@@ -5,7 +5,6 @@
  */
 
 #include <unistd.h>
-#include <sys/mman.h>
 #include <assert.h>
 #include <strings.h>
 #include <string.h>
@@ -29,7 +28,20 @@
 #define GET_ENTRY(index,table) ((heap_entry*)(table+index))
 
 
-
+#ifdef _WIN32
+# include <windows.h>
+long getpagesize (void) {
+    static long g_pagesize = 0;
+    if (! g_pagesize) {
+        SYSTEM_INFO system_info;
+        GetSystemInfo (&system_info);
+        g_pagesize = system_info.dwPageSize;
+    }
+    return g_pagesize;
+}
+#else
+#include <sys/mman.h>
+#endif
 
 /**
  * Stores the number of heap_entry structures
@@ -60,7 +72,7 @@ static void* map_in_pages(int page_count) {
         return NULL;
     else {
         // Clear the memory
-        bzero(addr,page_count*PAGE_SIZE);
+        memset(addr,0,page_count*PAGE_SIZE);
 
         // Return the address
         return addr;

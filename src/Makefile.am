@@ -5,7 +5,6 @@ lib_LTLIBRARIES = libstatsite.la
 libstatsite_la_SOURCES =
 libstatsite_la_SOURCES += MurmurHash3.c
 libstatsite_la_SOURCES += cm_quantile.c
-libstatsite_la_SOURCES += config.c
 libstatsite_la_SOURCES += counter.c
 libstatsite_la_SOURCES += hashmap.c
 libstatsite_la_SOURCES += heap.c

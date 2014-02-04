@@ -9,7 +9,7 @@
  * @return 0 on success
  */
 int radix_init(radix_tree *tree) {
-    bzero(tree, sizeof(radix_tree));
+    memset(tree, 0, sizeof(radix_tree));
     return 0;
 }
 
