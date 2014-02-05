@@ -60,6 +60,8 @@ void heap_insert(heap* h, void* key, void* value);
  */
 int heap_min(heap* h, void** key, void** value);
 
+void *heap_min_key(heap* h);
+
 /**
  * Deletes the element with the smallest key from the heap.
  * @param h Pointer to the heap structure
@@ -68,6 +70,8 @@ int heap_min(heap* h, void** key, void** value);
  * @return 1if the minimum element exists and is deleted, 0 if there are no elements.
  */
 int heap_delmin(heap* h, void** key, void** value);
+
+void *heap_delmin_value(heap* h);
 
 /**
  * Calls a function for each entry in the heap.

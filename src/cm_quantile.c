@@ -251,7 +251,8 @@ static void cm_insert(cm_quantile *cm) {
     // Check if this is the first element
     cm_sample *samp;
     if (!cm->samples) {
-        if (!heap_delmin(cm->bufMore, NULL, (void**)&samp)) return;
+        samp = heap_delmin_value(cm->bufMore);
+        if (!samp) return;
         samp->width = 1;
         samp->delta = 0;
         cm->samples = samp;
@@ -271,8 +272,8 @@ static void cm_insert(cm_quantile *cm) {
     int incr_size = cm_cursor_increment(cm);
     double *val;
     for (int i=0; i < incr_size and cm->insert.curs; i++) {
-        while (heap_min(cm->bufMore, (void**)&val, NULL) && *val <= cm_insert_point_value(cm)) {
-            heap_delmin(cm->bufMore, NULL, (void**)&samp);
+        while ((val = heap_min_key(cm->bufMore)) && *val <= cm_insert_point_value(cm)) {
+            samp = heap_delmin_value(cm->bufMore);
             samp->width = 1;
             samp->delta = cm->insert.curs->width + cm->insert.curs->delta - 1;
             cm_insert_sample(cm, cm->insert.curs, samp);
@@ -290,8 +291,8 @@ static void cm_insert(cm_quantile *cm) {
 
     // Handle adding values at the end
     if (cm->insert.curs == NULL) {
-        while (heap_min(cm->bufMore, (void**)&val, NULL) && *val > cm->end->value) {
-            heap_delmin(cm->bufMore, NULL, (void**)&samp);
+        while ((val = heap_min_key(cm->bufMore)) && *val > cm->end->value) {
+            samp = heap_delmin_value(cm->bufMore);
             samp->width = 1;
             samp->delta = 0;
             cm_append_sample(cm, samp);

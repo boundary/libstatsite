@@ -181,6 +181,11 @@ int heap_min(heap* h, void** key, void** value) {
     return 1;
 }
 
+void * heap_min_key(heap* h) {
+    void *key = NULL;
+    heap_min(h, &key, NULL);
+    return key;
+}
 
 // Insert a new element
 void heap_insert(heap *h, void* key, void* value) {
@@ -370,6 +375,12 @@ int heap_delmin(heap* h, void** key, void** value) {
     return 1;
 }
 
+void *heap_delmin_value(heap* h)
+{
+    void *value = NULL;
+    heap_delmin(h, NULL, &value);
+    return value;
+}
 
 // Allows a user to iterate over all entries, e.g. to free() the memory
 void heap_foreach(heap* h, void (*func)(void*,void*)) {
