@@ -138,6 +138,13 @@ int hashmap_get(hashmap *map, char *key, void **value) {
     return -1;
 }
 
+void * hashmap_get_value(hashmap *map, char *key)
+{
+    void *value = NULL;
+    hashmap_get(map, key, &value);
+    return value;
+}
+
 /**
  * Internal method to insert into a hash table
  * @arg table The table to insert into

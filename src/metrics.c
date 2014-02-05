@@ -106,11 +106,10 @@ int destroy_metrics(metrics *m) {
  * @return 0 on success
  */
 static int metrics_increment_counter(metrics *m, char *name, double val) {
-    counter *c;
-    int res = hashmap_get(m->counters, name, (void**)&c);
+    counter *c = hashmap_get_value(m->counters, name);
 
     // New counter
-    if (res == -1) {
+    if (!c) {
         c = malloc(sizeof(counter));
         init_counter(c);
         hashmap_put(m->counters, name, c);
@@ -128,18 +127,17 @@ static int metrics_increment_counter(metrics *m, char *name, double val) {
  * @return 0 on success.
  */
 static int metrics_add_timer_sample(metrics *m, char *name, double val) {
-    timer_hist *t;
     histogram_config *conf;
-    int res = hashmap_get(m->timers, name, (void**)&t);
+    timer_hist *t = hashmap_get_value(m->timers, name);
 
     // New timer
-    if (res == -1) {
+    if (!t) {
         t = malloc(sizeof(timer_hist));
         init_timer(m->timer_eps, m->quantiles, m->num_quants, &t->tm);
         hashmap_put(m->timers, name, t);
 
         // Check if we have any histograms configured
-        if (m->histograms && !radix_longest_prefix(m->histograms, name, (void**)&conf)) {
+        if (m->histograms && (conf = radix_longest_prefix_value(m->histograms, name))) {
             t->conf = conf;
             t->counts = calloc(conf->num_bins, sizeof(unsigned int));
         } else {
@@ -188,11 +186,10 @@ static int metrics_add_kv(metrics *m, char *name, double val) {
  * @return 0 on success
  */
 static int metrics_set_gauge(metrics *m, char *name, double val, bool delta) {
-    gauge_t *g;
-    int res = hashmap_get(m->gauges, name, (void**)&g);
+    gauge_t *g = hashmap_get_value(m->gauges, name);
 
     // New gauge
-    if (res == -1) {
+    if (!g) {
         g = malloc(sizeof(gauge_t));
         g->value = 0;
         hashmap_put(m->gauges, name, g);
@@ -242,11 +239,10 @@ int metrics_add_sample(metrics *m, metric_type type, char *name, double val) {
  * @return 0 on success
  */
 int metrics_set_update(metrics *m, char *name, char *value) {
-    set_t *s;
-    int res = hashmap_get(m->sets, name, (void**)&s);
+    set_t *s = hashmap_get_value(m->sets, name);
 
     // New set
-    if (res == -1) {
+    if (!s) {
         s = malloc(sizeof(set_t));
         set_init(m->set_precision, s);
         hashmap_put(m->sets, name, s);

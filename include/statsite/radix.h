@@ -69,6 +69,8 @@ int radix_search(radix_tree *t, char *key, void **value);
  */
 int radix_longest_prefix(radix_tree *t, char *key, void **value);
 
+void * radix_longest_prefix_value(radix_tree *t, char *key);
+
 /**
  * Iterates through all the nodes in the radix tree
  * @arg t The tree to iter through

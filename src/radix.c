@@ -214,6 +214,13 @@ int radix_longest_prefix(radix_tree *t, char *key, void **value) {
     return 1;
 }
 
+void * radix_longest_prefix_value(radix_tree *t, char *key)
+{
+    void *value = NULL;
+    radix_longest_prefix(t, key, &value);
+    return value;
+}
+
 // Recursively iterates
 static int recursive_iter(radix_node *n, void *data, int(*iter_func)(void *data, char *key, void *value)) {
     int ret = 0;

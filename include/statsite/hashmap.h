@@ -34,6 +34,8 @@ int hashmap_size(hashmap *map);
  */
 int hashmap_get(hashmap *map, char *key, void **value);
 
+void * hashmap_get_value(hashmap *map, char *key);
+
 /**
  * Puts a key/value pair.
  * @arg key The key to set. This is copied, and a seperate
