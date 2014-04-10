@@ -34,6 +34,8 @@ typedef struct {
 
 typedef struct {
     double value;
+    double prev_value;
+    uint64_t user;
 } gauge_t;
 
 typedef struct {
@@ -79,12 +81,22 @@ int destroy_metrics(metrics *m);
 
 /**
  * Adds a new sampled value
- * arg type The type of the metrics
+ * @arg type The type of the metrics
  * @arg name The name of the metric
  * @arg val The sample to add
  * @return 0 on success.
  */
 int metrics_add_sample(metrics *m, metric_type type, char *name, double val);
+
+/**
+ * Adds a new gauge value
+ * @arg name The name of the metric
+ * @arg val The sample to add
+ * @arg delta is this a GAUGE or GAUGE_DELTA
+ * @arg meta User-specified metadata
+ * @return 0 on success.
+ */
+int metrics_set_gauge(metrics *m, char *name, double val, bool delta, uint64_t user);
 
 /**
  * Adds a value to a named set.

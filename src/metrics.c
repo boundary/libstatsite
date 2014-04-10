@@ -185,7 +185,7 @@ static int metrics_add_kv(metrics *m, char *name, double val) {
  * @arg delta Is this a delta update
  * @return 0 on success
  */
-static int metrics_set_gauge(metrics *m, char *name, double val, bool delta) {
+int metrics_set_gauge(metrics *m, char *name, double val, bool delta, uint64_t user) {
     gauge_t *g = hashmap_get_value(m->gauges, name);
 
     // New gauge
@@ -195,6 +195,8 @@ static int metrics_set_gauge(metrics *m, char *name, double val, bool delta) {
         hashmap_put(m->gauges, name, g);
     }
 
+    g->user = user;
+    g->prev_value = g->value;
     if (delta) {
         g->value += val;
     } else {
@@ -216,10 +218,10 @@ int metrics_add_sample(metrics *m, metric_type type, char *name, double val) {
             return metrics_add_kv(m, name, val);
 
         case GAUGE:
-            return metrics_set_gauge(m, name, val, false);
+            return metrics_set_gauge(m, name, val, false, 0);
 
         case GAUGE_DELTA:
-            return metrics_set_gauge(m, name, val, true);
+            return metrics_set_gauge(m, name, val, true, 0);
 
         case COUNTER:
             return metrics_increment_counter(m, name, val);
