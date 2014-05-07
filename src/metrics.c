@@ -155,6 +155,8 @@ static int metrics_add_timer_sample(metrics *m, char *name, double val) {
             t->counts[conf->num_bins - 1]++;
         else {
             int idx = ((val - conf->min_val) / conf->bin_width) + 1;
+            if (idx >= conf->num_bins)
+                idx = conf->num_bins - 1;
             t->counts[idx]++;
         }
     }
