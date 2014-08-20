@@ -29,7 +29,7 @@ extern void MurmurHash3_x64_128(const void *key, const int len, const uint32_t s
  * @arg map Output. Set to the address of the map
  * @return 0 on success.
  */
-int hashmap_init(int initial_size, hashmap ** map)
+int hashmap_init(int initial_size, struct hashmap ** map)
 {
 	// Default to 64 if no size
 	if (initial_size <= 0) {
@@ -51,7 +51,7 @@ int hashmap_init(int initial_size, hashmap ** map)
 	}
 
 	// Allocate the map
-	hashmap *m = calloc(1, sizeof(hashmap));
+	struct hashmap *m = calloc(1, sizeof(struct hashmap));
 	m->table_size = initial_size;
 	m->max_size = MAX_CAPACITY * initial_size;
 
@@ -67,7 +67,7 @@ int hashmap_init(int initial_size, hashmap ** map)
  * Destroys a map and cleans up all associated memory
  * @arg map The hashmap to destroy. Frees memory.
  */
-int hashmap_destroy(hashmap * map)
+int hashmap_destroy(struct hashmap * map)
 {
 	// Free each entry
 	hashmap_entry *entry, *old;
@@ -101,7 +101,7 @@ int hashmap_destroy(hashmap * map)
 /**
  * Returns the size of the hashmap in items
  */
-int hashmap_size(hashmap * map)
+int hashmap_size(struct hashmap * map)
 {
 	return map->count;
 }
@@ -113,7 +113,7 @@ int hashmap_size(hashmap * map)
  * @arg value Output. Set to the value of th key.
  * 0 on success. -1 if not found.
  */
-int hashmap_get(hashmap * map, char *key, void **value)
+int hashmap_get(struct hashmap * map, char *key, void **value)
 {
 	// Compute the hash value of the key
 	uint64_t out[2];
@@ -141,7 +141,7 @@ int hashmap_get(hashmap * map, char *key, void **value)
 	return -1;
 }
 
-void *hashmap_get_value(hashmap * map, char *key)
+void *hashmap_get_value(struct hashmap * map, char *key)
 {
 	void *value = NULL;
 	hashmap_get(map, key, &value);
@@ -206,7 +206,7 @@ static int hashmap_insert_table(hashmap_entry * table, int table_size, char *key
 /**
  * Internal method to double the size of a hashmap
  */
-static void hashmap_double_size(hashmap * map)
+static void hashmap_double_size(struct hashmap * map)
 {
 	// Calculate the new sizes
 	int new_size = map->table_size * 2;
@@ -258,7 +258,7 @@ static void hashmap_double_size(hashmap * map)
  * @arg value The value to set.
  * 0 if updated, 1 if added.
  */
-int hashmap_put(hashmap * map, char *key, void *value)
+int hashmap_put(struct hashmap * map, char *key, void *value)
 {
 	// Check if we need to double the size
 	if (map->count + 1 > map->max_size) {
@@ -280,7 +280,7 @@ int hashmap_put(hashmap * map, char *key, void *value)
  * @arg key The key to delete
  * 0 on success. -1 if not found.
  */
-int hashmap_delete(hashmap * map, char *key)
+int hashmap_delete(struct hashmap * map, char *key)
 {
 	// Compute the hash value of the key
 	uint64_t out[2];
@@ -340,7 +340,7 @@ int hashmap_delete(hashmap * map, char *key)
  * @notes This method is not thread safe.
  * 0 on success. -1 if not found.
  */
-int hashmap_clear(hashmap * map)
+int hashmap_clear(struct hashmap * map)
 {
 	hashmap_entry *entry, *old;
 	int in_table;
@@ -381,7 +381,7 @@ int hashmap_clear(hashmap * map)
  * @arg data Opaque handle passed to the callback
  * @return 0 on success
  */
-int hashmap_iter(hashmap * map, hashmap_callback cb, void *data)
+int hashmap_iter(struct hashmap * map, hashmap_callback cb, void *data)
 {
 	hashmap_entry *entry;
 	int should_break = 0;
