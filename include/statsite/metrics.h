@@ -9,49 +9,49 @@
 #include "set.h"
 
 typedef enum {
-    UNKNOWN,
-    KEY_VAL,
-    GAUGE,
-    COUNTER,
-    TIMER,
-    SET,
-    GAUGE_DELTA
+	UNKNOWN,
+	KEY_VAL,
+	GAUGE,
+	COUNTER,
+	TIMER,
+	SET,
+	GAUGE_DELTA
 } metric_type;
 
 typedef struct key_val {
-    char *name;
-    double val;
-    struct key_val *next;
+	char *name;
+	double val;
+	struct key_val *next;
 } key_val;
 
 typedef struct {
-    timer tm;
+	timer tm;
 
-    // Support for histograms
-    histogram_config *conf;
-    unsigned int *counts;
+	// Support for histograms
+	histogram_config *conf;
+	unsigned int *counts;
 } timer_hist;
 
 typedef struct {
-    double value;
-    double prev_value;
-    uint64_t user;
+	double value;
+	double prev_value;
+	uint64_t user;
 } gauge_t;
 
 typedef struct {
-    hashmap *counters;  // Hashmap of name -> counter structs
-    hashmap *timers;    // Map of name -> timer_hist structs
-    hashmap *sets;      // Map of name -> set_t structs
-    hashmap *gauges;    // Map of name -> guage struct
-    key_val *kv_vals;   // Linked list of key_val structs
-    double timer_eps;   // The error for timers
-    double *quantiles;  // Array of quantiles
-    uint32_t num_quants; // Size of quantiles array
-    radix_tree *histograms; // Radix tree with histogram configs
-    unsigned char set_precision; // The precision for sets
+	hashmap *counters;			// Hashmap of name -> counter structs
+	hashmap *timers;			// Map of name -> timer_hist structs
+	hashmap *sets;				// Map of name -> set_t structs
+	hashmap *gauges;			// Map of name -> guage struct
+	key_val *kv_vals;			// Linked list of key_val structs
+	double timer_eps;			// The error for timers
+	double *quantiles;			// Array of quantiles
+	uint32_t num_quants;		// Size of quantiles array
+	radix_tree *histograms;		// Radix tree with histogram configs
+	unsigned char set_precision;	// The precision for sets
 } metrics;
 
-typedef int(*metric_callback)(void *data, metric_type type, char *name, void *val);
+typedef int (*metric_callback) (void *data, metric_type type, char *name, void *val);
 
 /**
  * Initializes the metrics struct.
@@ -63,7 +63,8 @@ typedef int(*metric_callback)(void *data, metric_type type, char *name, void *va
  * @arg set_precision The precision to use for sets
  * @return 0 on success.
  */
-int init_metrics(double timer_eps, double *quantiles, uint32_t num_quants, radix_tree *histograms, unsigned char set_precision, metrics *m);
+int init_metrics(double timer_eps, double *quantiles, uint32_t num_quants, radix_tree * histograms,
+	unsigned char set_precision, metrics * m);
 
 /**
  * Initializes the metrics struct, with preset configurations.
@@ -71,13 +72,13 @@ int init_metrics(double timer_eps, double *quantiles, uint32_t num_quants, radix
  * 0.5, 0.95, and 0.99.
  * @return 0 on success.
  */
-int init_metrics_defaults(metrics *m);
+int init_metrics_defaults(metrics * m);
 
 /**
  * Destroys the metrics
  * @return 0 on success.
  */
-int destroy_metrics(metrics *m);
+int destroy_metrics(metrics * m);
 
 /**
  * Adds a new sampled value
@@ -86,7 +87,7 @@ int destroy_metrics(metrics *m);
  * @arg val The sample to add
  * @return 0 on success.
  */
-int metrics_add_sample(metrics *m, metric_type type, char *name, double val);
+int metrics_add_sample(metrics * m, metric_type type, char *name, double val);
 
 /**
  * Adds a new gauge value
@@ -96,7 +97,7 @@ int metrics_add_sample(metrics *m, metric_type type, char *name, double val);
  * @arg meta User-specified metadata
  * @return 0 on success.
  */
-int metrics_set_gauge(metrics *m, char *name, double val, bool delta, uint64_t user);
+int metrics_set_gauge(metrics * m, char *name, double val, bool delta, uint64_t user);
 
 /**
  * Adds a value to a named set.
@@ -104,7 +105,7 @@ int metrics_set_gauge(metrics *m, char *name, double val, bool delta, uint64_t u
  * @arg value The value to add
  * @return 0 on success
  */
-int metrics_set_update(metrics *m, char *name, char *value);
+int metrics_set_update(metrics * m, char *name, char *value);
 
 /**
  * Iterates through all the metrics
@@ -116,6 +117,6 @@ int metrics_set_update(metrics *m, char *name, char *value);
  * a pointer to a timer. Return non-zero to stop iteration.
  * @return 0 on success.
  */
-int metrics_iter(metrics *m, void *data, metric_callback cb);
+int metrics_iter(metrics * m, void *data, metric_callback cb);
 
 #endif

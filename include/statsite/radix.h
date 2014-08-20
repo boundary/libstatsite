@@ -13,18 +13,18 @@
 #define RADIX_H
 
 typedef struct {
-    char *key;
-    void *value;
+	char *key;
+	void *value;
 } radix_leaf;
 
 typedef struct radix_node {
-    char *key;
-    int key_len;
-    void *edges[256];
+	char *key;
+	int key_len;
+	void *edges[256];
 } radix_node;
 
 typedef struct {
-    radix_node root;
+	radix_node root;
 } radix_tree;
 
 /**
@@ -32,14 +32,14 @@ typedef struct {
  * @arg tree The tree to initialize
  * @return 0 on success
  */
-int radix_init(radix_tree *tree);
+int radix_init(radix_tree * tree);
 
 /**
  * Destroys the tree
  * @arg tree The tree to destroy
  * @return 0 on success
  */
-int radix_destroy(radix_tree *tree);
+int radix_destroy(radix_tree * tree);
 
 /**
  * Inserts a value into the tree
@@ -49,7 +49,7 @@ int radix_destroy(radix_tree *tree);
  * by the value that was updated if any
  * @return 0 if the value was inserted, 1 if the value was updated.
  */
-int radix_insert(radix_tree *t, char *key, void **value);
+int radix_insert(radix_tree * t, char *key, void **value);
 
 /**
  * Finds a value in the tree
@@ -58,7 +58,7 @@ int radix_insert(radix_tree *t, char *key, void **value);
  * @arg value The value of the key
  * @return 0 if found
  */
-int radix_search(radix_tree *t, char *key, void **value);
+int radix_search(radix_tree * t, char *key, void **value);
 
 /**
  * Finds the longest matching prefix
@@ -67,9 +67,9 @@ int radix_search(radix_tree *t, char *key, void **value);
  * @arg value The value of the key with the longest prefix
  * @return 0 if found
  */
-int radix_longest_prefix(radix_tree *t, char *key, void **value);
+int radix_longest_prefix(radix_tree * t, char *key, void **value);
 
-void * radix_longest_prefix_value(radix_tree *t, char *key);
+void *radix_longest_prefix_value(radix_tree * t, char *key);
 
 /**
  * Iterates through all the nodes in the radix tree
@@ -79,6 +79,7 @@ void * radix_longest_prefix_value(radix_tree *t, char *key);
  * non-zero to stop iteration.
  * @return 0 on sucess. 1 if the iteration was stopped.
  */
-int radix_foreach(radix_tree *t, void *data, int(*iter_func)(void* data, char *key, void *value));
+int radix_foreach(radix_tree * t, void *data, int (*iter_func) (void *data, char *key,
+		void *value));
 
 #endif

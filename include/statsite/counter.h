@@ -3,11 +3,11 @@
 #include <stdint.h>
 
 struct counter {
-    uint64_t count;     // Count of items
-    double sum;         // Sum of the values
-    double squared_sum; // Sum of the squared values
-    double min;         // Minimum value
-    double max;         // Maximum value
+	uint64_t count;				// Count of items
+	double sum;					// Sum of the values
+	double squared_sum;			// Sum of the squared values
+	double min;					// Minimum value
+	double max;					// Maximum value
 };
 
 /**

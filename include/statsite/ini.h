@@ -29,17 +29,15 @@ extern "C" {
    Returns 0 on success, line number of first error on parse error (doesn't
    stop on first error), or -1 on file open error.
 */
-int ini_parse(const char* filename,
-              int (*handler)(void* user, const char* section,
-                             const char* name, const char* value),
-              void* user);
+	int ini_parse(const char *filename,
+		int (*handler) (void *user, const char *section,
+			const char *name, const char *value), void *user);
 
 /* Same as ini_parse(), but takes a FILE* instead of filename. This doesn't
    close the file when it's finished -- the caller must do that. */
-int ini_parse_file(FILE* file,
-                   int (*handler)(void* user, const char* section,
-                                  const char* name, const char* value),
-                   void* user);
+	int ini_parse_file(FILE * file,
+		int (*handler) (void *user, const char *section,
+			const char *name, const char *value), void *user);
 
 /* Nonzero to allow multi-line value parsing, in the style of Python's
    ConfigParser. If allowed, ini_parse() will call the handler with the same
@@ -51,5 +49,4 @@ int ini_parse_file(FILE* file,
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* __INI_H__ */
+#endif							/* __INI_H__ */
