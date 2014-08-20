@@ -6,7 +6,7 @@
  * @arg counter The counter struct to initialize
  * @return 0 on success.
  */
-int init_counter(counter *counter) {
+int init_counter(struct counter *counter) {
     counter->count = 0;
     counter->sum = 0;
     counter->squared_sum = 0;
@@ -21,7 +21,7 @@ int init_counter(counter *counter) {
  * @arg sample The new sample value
  * @return 0 on success.
  */
-int counter_add_sample(counter *counter, double sample) {
+int counter_add_sample(struct counter *counter, double sample) {
     if (counter->count == 0) {
         counter->min = counter->max = sample;
     } else {
@@ -41,7 +41,7 @@ int counter_add_sample(counter *counter, double sample) {
  * @arg counter The counter to query
  * @return The number of samples
  */
-uint64_t counter_count(counter *counter) {
+uint64_t counter_count(struct counter *counter) {
     return counter->count;
 }
 
@@ -50,7 +50,7 @@ uint64_t counter_count(counter *counter) {
  * @arg counter The counter to query
  * @return The mean value
  */
-double counter_mean(counter *counter) {
+double counter_mean(struct counter *counter) {
     return (counter->count) ? counter->sum / counter->count : 0;
 }
 
@@ -59,7 +59,7 @@ double counter_mean(counter *counter) {
  * @arg counter The counter to query
  * @return The sample standard deviation
  */
-double counter_stddev(counter *counter) {
+double counter_stddev(struct counter *counter) {
     double num = (counter->count * counter->squared_sum) - pow(counter->sum, 2);
     double div = counter->count * (counter->count - 1);
     if (div == 0) return 0;
@@ -71,7 +71,7 @@ double counter_stddev(counter *counter) {
  * @arg counter The counter to query
  * @return The sum of values
  */
-double counter_sum(counter *counter) {
+double counter_sum(struct counter *counter) {
     return counter->sum;
 }
 
@@ -80,7 +80,7 @@ double counter_sum(counter *counter) {
  * @arg counter The counter to query
  * @return The sum squared of values
  */
-double counter_squared_sum(counter *counter) {
+double counter_squared_sum(struct counter *counter) {
     return counter->squared_sum;
 }
 
@@ -89,7 +89,7 @@ double counter_squared_sum(counter *counter) {
  * @arg counter The counter to query
  * @return The minimum value.
  */
-double counter_min(counter *counter) {
+double counter_min(struct counter *counter) {
     return counter->min;
 }
 
@@ -98,7 +98,7 @@ double counter_min(counter *counter) {
  * @arg counter The counter to query
  * @return The maximum value.
  */
-double counter_max(counter *counter) {
+double counter_max(struct counter *counter) {
     return counter->max;
 }
 

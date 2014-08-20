@@ -106,11 +106,11 @@ int destroy_metrics(metrics *m) {
  * @return 0 on success
  */
 static int metrics_increment_counter(metrics *m, char *name, double val) {
-    counter *c = hashmap_get_value(m->counters, name);
+    struct counter *c = hashmap_get_value(m->counters, name);
 
     // New counter
     if (!c) {
-        c = malloc(sizeof(counter));
+        c = malloc(sizeof(struct counter));
         init_counter(c);
         hashmap_put(m->counters, name, c);
     }
