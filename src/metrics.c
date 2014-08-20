@@ -197,11 +197,11 @@ static int metrics_add_kv(metrics * m, char *name, double val)
  */
 int metrics_set_gauge(metrics * m, char *name, double val, bool delta, uint64_t user)
 {
-	gauge_t *g = hashmap_get_value(m->gauges, name);
+	struct gauge *g = hashmap_get_value(m->gauges, name);
 
 	// New gauge
 	if (!g) {
-		g = malloc(sizeof(gauge_t));
+		g = malloc(sizeof(struct gauge));
 		g->value = 0;
 		hashmap_put(m->gauges, name, g);
 	}
@@ -346,7 +346,7 @@ static int set_delete_cb(void *data, const char *key, void *value)
 // Gauge map cleanup
 static int gauge_delete_cb(void *data, const char *key, void *value)
 {
-	gauge_t *g = value;
+	struct gauge *g = value;
 	free(g);
 	return 0;
 }

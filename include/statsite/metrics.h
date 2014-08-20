@@ -32,11 +32,11 @@ struct timer_hist {
 	unsigned int *counts;
 };
 
-typedef struct {
+struct gauge {
 	double value;
 	double prev_value;
 	uint64_t user;
-} gauge_t;
+};
 
 typedef struct {
 	hashmap *counters;           // Hashmap of name -> counter structs
