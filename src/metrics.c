@@ -137,11 +137,11 @@ static int metrics_increment_counter(metrics * m, char *name, double val)
 static int metrics_add_timer_sample(metrics * m, char *name, double val)
 {
 	histogram_config *conf;
-	timer_hist *t = hashmap_get_value(m->timers, name);
+	struct timer_hist *t = hashmap_get_value(m->timers, name);
 
 	// New timer
 	if (!t) {
-		t = malloc(sizeof(timer_hist));
+		t = malloc(sizeof(struct timer_hist));
 		init_timer(m->timer_eps, m->quantiles, m->num_quants, &t->tm);
 		hashmap_put(m->timers, name, t);
 
@@ -326,7 +326,7 @@ static int counter_delete_cb(void *data, const char *key, void *value)
 // Timer map cleanup
 static int timer_delete_cb(void *data, const char *key, void *value)
 {
-	timer_hist *t = value;
+	struct timer_hist *t = value;
 	destroy_timer(&t->tm);
 	if (t->counts)
 		free(t->counts);

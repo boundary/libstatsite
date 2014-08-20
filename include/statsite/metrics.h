@@ -24,13 +24,13 @@ struct key_val {
 	struct key_val *next;
 };
 
-typedef struct {
+struct timer_hist {
 	timer tm;
 
 	// Support for histograms
 	histogram_config *conf;
 	unsigned int *counts;
-} timer_hist;
+};
 
 typedef struct {
 	double value;
