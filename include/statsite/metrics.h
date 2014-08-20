@@ -8,14 +8,14 @@
 #include "hashmap.h"
 #include "set.h"
 
-typedef enum {
-	UNKNOWN,
-	KEY_VAL,
-	GAUGE,
-	COUNTER,
-	TIMER,
-	SET,
-	GAUGE_DELTA
+enum metric_type {
+	METRIC_TYPE_UNKNOWN,
+	METRIC_TYPE_KEY_VAL,
+	METRIC_TYPE_GAUGE,
+	METRIC_TYPE_COUNTER,
+	METRIC_TYPE_TIMER,
+	METRIC_TYPE_SET,
+	METRIC_TYPE_GAUGE_DELTA
 } metric_type;
 
 typedef struct key_val {
@@ -51,7 +51,7 @@ typedef struct {
 	unsigned char set_precision;	// The precision for sets
 } metrics;
 
-typedef int (*metric_callback) (void *data, metric_type type, char *name, void *val);
+typedef int (*metric_callback) (void *data, enum metric_type type, char *name, void *val);
 
 /**
  * Initializes the metrics struct.
@@ -87,7 +87,7 @@ int destroy_metrics(metrics * m);
  * @arg val The sample to add
  * @return 0 on success.
  */
-int metrics_add_sample(metrics * m, metric_type type, char *name, double val);
+int metrics_add_sample(metrics * m, enum metric_type type, char *name, double val);
 
 /**
  * Adds a new gauge value

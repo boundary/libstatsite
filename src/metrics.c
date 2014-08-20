@@ -10,7 +10,7 @@ static int gauge_delete_cb(void *data, const char *key, void *value);
 static int iter_cb(void *data, const char *key, void *value);
 
 struct cb_info {
-	metric_type type;
+	enum metric_type type;
 	void *data;
 	metric_callback cb;
 };
@@ -223,22 +223,22 @@ int metrics_set_gauge(metrics * m, char *name, double val, bool delta, uint64_t 
  * @arg val The sample to add
  * @return 0 on success.
  */
-int metrics_add_sample(metrics * m, metric_type type, char *name, double val)
+int metrics_add_sample(metrics * m, enum metric_type type, char *name, double val)
 {
 	switch (type) {
-	case KEY_VAL:
+	case METRIC_TYPE_KEY_VAL:
 		return metrics_add_kv(m, name, val);
 
-	case GAUGE:
+	case METRIC_TYPE_GAUGE:
 		return metrics_set_gauge(m, name, val, false, 0);
 
-	case GAUGE_DELTA:
+	case METRIC_TYPE_GAUGE_DELTA:
 		return metrics_set_gauge(m, name, val, true, 0);
 
-	case COUNTER:
+	case METRIC_TYPE_COUNTER:
 		return metrics_increment_counter(m, name, val);
 
-	case TIMER:
+	case METRIC_TYPE_TIMER:
 		return metrics_add_timer_sample(m, name, val);
 
 	default:
@@ -283,14 +283,14 @@ int metrics_iter(metrics * m, void *data, metric_callback cb)
 	key_val *current = m->kv_vals;
 	int should_break = 0;
 	while (current && !should_break) {
-		should_break = cb(data, KEY_VAL, current->name, &current->val);
+		should_break = cb(data, METRIC_TYPE_KEY_VAL, current->name, &current->val);
 		current = current->next;
 	}
 	if (should_break)
 		return should_break;
 
 	// Store our data in a small struct
-	struct cb_info info = { COUNTER, data, cb };
+	struct cb_info info = { METRIC_TYPE_COUNTER, data, cb };
 
 	// Send the counters
 	should_break = hashmap_iter(m->counters, iter_cb, &info);
@@ -298,19 +298,19 @@ int metrics_iter(metrics * m, void *data, metric_callback cb)
 		return should_break;
 
 	// Send the timers
-	info.type = TIMER;
+	info.type = METRIC_TYPE_TIMER;
 	should_break = hashmap_iter(m->timers, iter_cb, &info);
 	if (should_break)
 		return should_break;
 
 	// Send the gauges
-	info.type = GAUGE;
+	info.type = METRIC_TYPE_GAUGE;
 	should_break = hashmap_iter(m->gauges, iter_cb, &info);
 	if (should_break)
 		return should_break;
 
 	// Send the sets
-	info.type = SET;
+	info.type = METRIC_TYPE_SET;
 	should_break = hashmap_iter(m->sets, iter_cb, &info);
 
 	return should_break;
