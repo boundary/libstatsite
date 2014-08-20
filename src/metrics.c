@@ -10,9 +10,9 @@ static int gauge_delete_cb(void *data, const char *key, void *value);
 static int iter_cb(void *data, const char *key, void *value);
 
 struct cb_info {
-    metric_type type;
-    void *data;
-    metric_callback cb;
+	metric_type type;
+	void *data;
+	metric_callback cb;
 };
 
 /**
@@ -25,28 +25,34 @@ struct cb_info {
  * @arg set_precision The precision to use for sets
  * @return 0 on success.
  */
-int init_metrics(double timer_eps, double *quantiles, uint32_t num_quants, radix_tree *histograms, unsigned char set_precision, metrics *m) {
-    // Copy the inputs
-    m->timer_eps = timer_eps;
-    m->num_quants = num_quants;
-    m->quantiles = malloc(num_quants * sizeof(double));
-    memcpy(m->quantiles, quantiles, num_quants * sizeof(double));
-    m->histograms = histograms;
-    m->set_precision = set_precision;
+int init_metrics(double timer_eps, double *quantiles, uint32_t num_quants, radix_tree * histograms,
+	unsigned char set_precision, metrics * m)
+{
+	// Copy the inputs
+	m->timer_eps = timer_eps;
+	m->num_quants = num_quants;
+	m->quantiles = malloc(num_quants * sizeof(double));
+	memcpy(m->quantiles, quantiles, num_quants * sizeof(double));
+	m->histograms = histograms;
+	m->set_precision = set_precision;
 
-    // Allocate the hashmaps
-    int res = hashmap_init(0, &m->counters);
-    if (res) return res;
-    res = hashmap_init(0, &m->timers);
-    if (res) return res;
-    res = hashmap_init(0, &m->sets);
-    if (res) return res;
-    res = hashmap_init(0, &m->gauges);
-    if (res) return res;
+	// Allocate the hashmaps
+	int res = hashmap_init(0, &m->counters);
+	if (res)
+		return res;
+	res = hashmap_init(0, &m->timers);
+	if (res)
+		return res;
+	res = hashmap_init(0, &m->sets);
+	if (res)
+		return res;
+	res = hashmap_init(0, &m->gauges);
+	if (res)
+		return res;
 
-    // Set the head of our linked list to null
-    m->kv_vals = NULL;
-    return 0;
+	// Set the head of our linked list to null
+	m->kv_vals = NULL;
+	return 0;
 }
 
 /**
@@ -56,46 +62,48 @@ int init_metrics(double timer_eps, double *quantiles, uint32_t num_quants, radix
  * precision is 12 (2% variance).
  * @return 0 on success.
  */
-int init_metrics_defaults(metrics *m) {
-    double quants[] = {0.5, 0.95, 0.99};
-    return init_metrics(0.01, (double*)&quants, 3, NULL, 12, m);
+int init_metrics_defaults(metrics * m)
+{
+	double quants[] = { 0.5, 0.95, 0.99 };
+	return init_metrics(0.01, (double *)&quants, 3, NULL, 12, m);
 }
 
 /**
  * Destroys the metrics
  * @return 0 on success.
  */
-int destroy_metrics(metrics *m) {
-    // Clear the copied quantiles array
-    free(m->quantiles);
+int destroy_metrics(metrics * m)
+{
+	// Clear the copied quantiles array
+	free(m->quantiles);
 
-    // Nuke all the k/v pairs
-    key_val *current = m->kv_vals;
-    key_val *prev = NULL;
-    while (current) {
-        free(current->name);
-        prev = current;
-        current = current->next;
-        free(prev);
-    }
+	// Nuke all the k/v pairs
+	key_val *current = m->kv_vals;
+	key_val *prev = NULL;
+	while (current) {
+		free(current->name);
+		prev = current;
+		current = current->next;
+		free(prev);
+	}
 
-    // Nuke the counters
-    hashmap_iter(m->counters, counter_delete_cb, NULL);
-    hashmap_destroy(m->counters);
+	// Nuke the counters
+	hashmap_iter(m->counters, counter_delete_cb, NULL);
+	hashmap_destroy(m->counters);
 
-    // Nuke the timers
-    hashmap_iter(m->timers, timer_delete_cb, NULL);
-    hashmap_destroy(m->timers);
+	// Nuke the timers
+	hashmap_iter(m->timers, timer_delete_cb, NULL);
+	hashmap_destroy(m->timers);
 
-    // Nuke the timers
-    hashmap_iter(m->sets, set_delete_cb, NULL);
-    hashmap_destroy(m->sets);
+	// Nuke the timers
+	hashmap_iter(m->sets, set_delete_cb, NULL);
+	hashmap_destroy(m->sets);
 
-    // Nuke the gauges
-    hashmap_iter(m->gauges, gauge_delete_cb, NULL);
-    hashmap_destroy(m->gauges);
+	// Nuke the gauges
+	hashmap_iter(m->gauges, gauge_delete_cb, NULL);
+	hashmap_destroy(m->gauges);
 
-    return 0;
+	return 0;
 }
 
 /**
@@ -105,18 +113,18 @@ int destroy_metrics(metrics *m) {
  * @arg val The value to add
  * @return 0 on success
  */
-static int metrics_increment_counter(metrics *m, char *name, double val) {
-    struct counter *c = hashmap_get_value(m->counters, name);
+static int metrics_increment_counter(metrics * m, char *name, double val)
+{
+	struct counter *c = hashmap_get_value(m->counters, name);
 
-    // New counter
-    if (!c) {
-        c = malloc(sizeof(struct counter));
-        init_counter(c);
-        hashmap_put(m->counters, name, c);
-    }
-
-    // Add the sample value
-    return counter_add_sample(c, val);
+	// New counter
+	if (!c) {
+		c = malloc(sizeof(struct counter));
+		init_counter(c);
+		hashmap_put(m->counters, name, c);
+	}
+	// Add the sample value
+	return counter_add_sample(c, val);
 }
 
 /**
@@ -126,43 +134,42 @@ static int metrics_increment_counter(metrics *m, char *name, double val) {
  * @arg val The sample to add
  * @return 0 on success.
  */
-static int metrics_add_timer_sample(metrics *m, char *name, double val) {
-    histogram_config *conf;
-    timer_hist *t = hashmap_get_value(m->timers, name);
+static int metrics_add_timer_sample(metrics * m, char *name, double val)
+{
+	histogram_config *conf;
+	timer_hist *t = hashmap_get_value(m->timers, name);
 
-    // New timer
-    if (!t) {
-        t = malloc(sizeof(timer_hist));
-        init_timer(m->timer_eps, m->quantiles, m->num_quants, &t->tm);
-        hashmap_put(m->timers, name, t);
+	// New timer
+	if (!t) {
+		t = malloc(sizeof(timer_hist));
+		init_timer(m->timer_eps, m->quantiles, m->num_quants, &t->tm);
+		hashmap_put(m->timers, name, t);
 
-        // Check if we have any histograms configured
-        if (m->histograms && (conf = radix_longest_prefix_value(m->histograms, name))) {
-            t->conf = conf;
-            t->counts = calloc(conf->num_bins, sizeof(unsigned int));
-        } else {
-            t->conf = NULL;
-            t->counts = NULL;
-        }
-    }
-
-    // Add the histogram value
-    if (t->conf) {
-        conf = t->conf;
-        if (val < conf->min_val)
-            t->counts[0]++;
-        else if (val >= conf->max_val)
-            t->counts[conf->num_bins - 1]++;
-        else {
-            int idx = ((val - conf->min_val) / conf->bin_width) + 1;
-            if (idx >= conf->num_bins)
-                idx = conf->num_bins - 1;
-            t->counts[idx]++;
-        }
-    }
-
-    // Add the sample value
-    return timer_add_sample(&t->tm, val);
+		// Check if we have any histograms configured
+		if (m->histograms && (conf = radix_longest_prefix_value(m->histograms, name))) {
+			t->conf = conf;
+			t->counts = calloc(conf->num_bins, sizeof(unsigned int));
+		} else {
+			t->conf = NULL;
+			t->counts = NULL;
+		}
+	}
+	// Add the histogram value
+	if (t->conf) {
+		conf = t->conf;
+		if (val < conf->min_val)
+			t->counts[0]++;
+		else if (val >= conf->max_val)
+			t->counts[conf->num_bins - 1]++;
+		else {
+			int idx = ((val - conf->min_val) / conf->bin_width) + 1;
+			if (idx >= conf->num_bins)
+				idx = conf->num_bins - 1;
+			t->counts[idx]++;
+		}
+	}
+	// Add the sample value
+	return timer_add_sample(&t->tm, val);
 }
 
 /**
@@ -171,13 +178,14 @@ static int metrics_add_timer_sample(metrics *m, char *name, double val) {
  * @arg val The value associated
  * @return 0 on success.
  */
-static int metrics_add_kv(metrics *m, char *name, double val) {
-    key_val *kv = malloc(sizeof(key_val));
-    kv->name = strdup(name);
-    kv->val = val;
-    kv->next = m->kv_vals;
-    m->kv_vals = kv;
-    return 0;
+static int metrics_add_kv(metrics * m, char *name, double val)
+{
+	key_val *kv = malloc(sizeof(key_val));
+	kv->name = strdup(name);
+	kv->val = val;
+	kv->next = m->kv_vals;
+	m->kv_vals = kv;
+	return 0;
 }
 
 /**
@@ -187,24 +195,25 @@ static int metrics_add_kv(metrics *m, char *name, double val) {
  * @arg delta Is this a delta update
  * @return 0 on success
  */
-int metrics_set_gauge(metrics *m, char *name, double val, bool delta, uint64_t user) {
-    gauge_t *g = hashmap_get_value(m->gauges, name);
+int metrics_set_gauge(metrics * m, char *name, double val, bool delta, uint64_t user)
+{
+	gauge_t *g = hashmap_get_value(m->gauges, name);
 
-    // New gauge
-    if (!g) {
-        g = malloc(sizeof(gauge_t));
-        g->value = 0;
-        hashmap_put(m->gauges, name, g);
-    }
+	// New gauge
+	if (!g) {
+		g = malloc(sizeof(gauge_t));
+		g->value = 0;
+		hashmap_put(m->gauges, name, g);
+	}
 
-    g->user = user;
-    g->prev_value = g->value;
-    if (delta) {
-        g->value += val;
-    } else {
-        g->value = val;
-    }
-    return 0;
+	g->user = user;
+	g->prev_value = g->value;
+	if (delta) {
+		g->value += val;
+	} else {
+		g->value = val;
+	}
+	return 0;
 }
 
 /**
@@ -214,26 +223,27 @@ int metrics_set_gauge(metrics *m, char *name, double val, bool delta, uint64_t u
  * @arg val The sample to add
  * @return 0 on success.
  */
-int metrics_add_sample(metrics *m, metric_type type, char *name, double val) {
-    switch (type) {
-        case KEY_VAL:
-            return metrics_add_kv(m, name, val);
+int metrics_add_sample(metrics * m, metric_type type, char *name, double val)
+{
+	switch (type) {
+	case KEY_VAL:
+		return metrics_add_kv(m, name, val);
 
-        case GAUGE:
-            return metrics_set_gauge(m, name, val, false, 0);
+	case GAUGE:
+		return metrics_set_gauge(m, name, val, false, 0);
 
-        case GAUGE_DELTA:
-            return metrics_set_gauge(m, name, val, true, 0);
+	case GAUGE_DELTA:
+		return metrics_set_gauge(m, name, val, true, 0);
 
-        case COUNTER:
-            return metrics_increment_counter(m, name, val);
+	case COUNTER:
+		return metrics_increment_counter(m, name, val);
 
-        case TIMER:
-            return metrics_add_timer_sample(m, name, val);
+	case TIMER:
+		return metrics_add_timer_sample(m, name, val);
 
-        default:
-            return -1;
-    }
+	default:
+		return -1;
+	}
 }
 
 /**
@@ -242,19 +252,19 @@ int metrics_add_sample(metrics *m, metric_type type, char *name, double val) {
  * @arg value The value to add
  * @return 0 on success
  */
-int metrics_set_update(metrics *m, char *name, char *value) {
-    set_t *s = hashmap_get_value(m->sets, name);
+int metrics_set_update(metrics * m, char *name, char *value)
+{
+	set_t *s = hashmap_get_value(m->sets, name);
 
-    // New set
-    if (!s) {
-        s = malloc(sizeof(set_t));
-        set_init(m->set_precision, s);
-        hashmap_put(m->sets, name, s);
-    }
-
-    // Add the sample value
-    set_add(s, value);
-    return 0;
+	// New set
+	if (!s) {
+		s = malloc(sizeof(set_t));
+		set_init(m->set_precision, s);
+		hashmap_put(m->sets, name, s);
+	}
+	// Add the sample value
+	set_add(s, value);
+	return 0;
 }
 
 /**
@@ -267,73 +277,83 @@ int metrics_set_update(metrics *m, char *name, char *value) {
  * a pointer to a timer. Return non-zero to stop iteration.
  * @return 0 on success, or the return of the callback
  */
-int metrics_iter(metrics *m, void *data, metric_callback cb) {
-    // Handle the K/V pairs first
-    key_val *current = m->kv_vals;
-    int should_break = 0;
-    while (current && !should_break) {
-        should_break = cb(data, KEY_VAL, current->name, &current->val);
-        current = current->next;
-    }
-    if (should_break) return should_break;
+int metrics_iter(metrics * m, void *data, metric_callback cb)
+{
+	// Handle the K/V pairs first
+	key_val *current = m->kv_vals;
+	int should_break = 0;
+	while (current && !should_break) {
+		should_break = cb(data, KEY_VAL, current->name, &current->val);
+		current = current->next;
+	}
+	if (should_break)
+		return should_break;
 
-    // Store our data in a small struct
-    struct cb_info info = {COUNTER, data, cb};
+	// Store our data in a small struct
+	struct cb_info info = { COUNTER, data, cb };
 
-    // Send the counters
-    should_break = hashmap_iter(m->counters, iter_cb, &info);
-    if (should_break) return should_break;
+	// Send the counters
+	should_break = hashmap_iter(m->counters, iter_cb, &info);
+	if (should_break)
+		return should_break;
 
-    // Send the timers
-    info.type = TIMER;
-    should_break = hashmap_iter(m->timers, iter_cb, &info);
-    if (should_break) return should_break;
+	// Send the timers
+	info.type = TIMER;
+	should_break = hashmap_iter(m->timers, iter_cb, &info);
+	if (should_break)
+		return should_break;
 
-    // Send the gauges
-    info.type = GAUGE;
-    should_break = hashmap_iter(m->gauges, iter_cb, &info);
-    if (should_break) return should_break;
+	// Send the gauges
+	info.type = GAUGE;
+	should_break = hashmap_iter(m->gauges, iter_cb, &info);
+	if (should_break)
+		return should_break;
 
-    // Send the sets
-    info.type = SET;
-    should_break = hashmap_iter(m->sets, iter_cb, &info);
+	// Send the sets
+	info.type = SET;
+	should_break = hashmap_iter(m->sets, iter_cb, &info);
 
-    return should_break;
+	return should_break;
 }
 
 // Counter map cleanup
-static int counter_delete_cb(void *data, const char *key, void *value) {
-    free(value);
-    return 0;
+static int counter_delete_cb(void *data, const char *key, void *value)
+{
+	free(value);
+	return 0;
 }
 
 // Timer map cleanup
-static int timer_delete_cb(void *data, const char *key, void *value) {
-    timer_hist *t = value;
-    destroy_timer(&t->tm);
-    if (t->counts) free(t->counts);
-    free(t);
-    return 0;
+static int timer_delete_cb(void *data, const char *key, void *value)
+{
+	timer_hist *t = value;
+	destroy_timer(&t->tm);
+	if (t->counts)
+		free(t->counts);
+	free(t);
+	return 0;
 }
 
 // Set map cleanup
-static int set_delete_cb(void *data, const char *key, void *value) {
-    set_t *s = value;
-    set_destroy(s);
-    free(s);
-    return 0;
+static int set_delete_cb(void *data, const char *key, void *value)
+{
+	set_t *s = value;
+	set_destroy(s);
+	free(s);
+	return 0;
 }
 
 // Gauge map cleanup
-static int gauge_delete_cb(void *data, const char *key, void *value) {
-    gauge_t *g = value;
-    free(g);
-    return 0;
+static int gauge_delete_cb(void *data, const char *key, void *value)
+{
+	gauge_t *g = value;
+	free(g);
+	return 0;
 }
 
 // Callback to invoke the user code
-static int iter_cb(void *data, const char *key, void *value) {
-    struct cb_info *info = data;
-    return info->cb(info->data, info->type, (char*)key, value);
+static int iter_cb(void *data, const char *key, void *value)
+{
+	struct cb_info *info = data;
+	return info->cb(info->data, info->type, (char *)key, value);
 }
-

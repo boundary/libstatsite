@@ -2,7 +2,7 @@
 #include "timer.h"
 
 /* Static declarations */
-static void finalize_timer(timer *timer);
+static void finalize_timer(timer * timer);
 
 /**
  * Initializes the timer struct
@@ -12,13 +12,14 @@ static void finalize_timer(timer *timer);
  * @arg timeer The timer struct to initialize
  * @return 0 on success.
  */
-int init_timer(double eps, double *quantiles, uint32_t num_quants, timer *timer) {
-    timer->count = 0;
-    timer->sum = 0;
-    timer->squared_sum = 0;
-    timer->finalized = 1;
-    int res = init_cm_quantile(eps, quantiles, num_quants, &timer->cm);
-    return res;
+int init_timer(double eps, double *quantiles, uint32_t num_quants, timer * timer)
+{
+	timer->count = 0;
+	timer->sum = 0;
+	timer->squared_sum = 0;
+	timer->finalized = 1;
+	int res = init_cm_quantile(eps, quantiles, num_quants, &timer->cm);
+	return res;
 }
 
 /**
@@ -26,8 +27,9 @@ int init_timer(double eps, double *quantiles, uint32_t num_quants, timer *timer)
  * @arg timer The timer to destroy
  * @return 0 on success.
  */
-int destroy_timer(timer *timer) {
-    return destroy_cm_quantile(&timer->cm);
+int destroy_timer(timer * timer)
+{
+	return destroy_cm_quantile(&timer->cm);
 }
 
 /**
@@ -36,12 +38,13 @@ int destroy_timer(timer *timer) {
  * @arg sample The new sample value
  * @return 0 on success.
  */
-int timer_add_sample(timer *timer, double sample) {
-    timer->count += 1;
-    timer->sum += sample;
-    timer->squared_sum += pow(sample, 2);
-    timer->finalized = 0;
-    return cm_add_sample(&timer->cm, sample);
+int timer_add_sample(timer * timer, double sample)
+{
+	timer->count += 1;
+	timer->sum += sample;
+	timer->squared_sum += pow(sample, 2);
+	timer->finalized = 0;
+	return cm_add_sample(&timer->cm, sample);
 }
 
 /**
@@ -50,9 +53,10 @@ int timer_add_sample(timer *timer, double sample) {
  * @arg quantile The quantile to query
  * @return The value on success or 0.
  */
-double timer_query(timer *timer, double quantile) {
-    finalize_timer(timer);
-    return cm_query(&timer->cm, quantile);
+double timer_query(timer * timer, double quantile)
+{
+	finalize_timer(timer);
+	return cm_query(&timer->cm, quantile);
 }
 
 /**
@@ -60,8 +64,9 @@ double timer_query(timer *timer, double quantile) {
  * @arg timer The timer to query
  * @return The number of samples
  */
-uint64_t timer_count(timer *timer) {
-    return timer->count;
+uint64_t timer_count(timer * timer)
+{
+	return timer->count;
 }
 
 /**
@@ -69,10 +74,12 @@ uint64_t timer_count(timer *timer) {
  * @arg timer The timer to query
  * @return The number of samples
  */
-double timer_min(timer *timer) {
-    finalize_timer(timer);
-    if (!timer->cm.samples) return 0;
-    return timer->cm.samples->value;
+double timer_min(timer * timer)
+{
+	finalize_timer(timer);
+	if (!timer->cm.samples)
+		return 0;
+	return timer->cm.samples->value;
 }
 
 /**
@@ -80,8 +87,9 @@ double timer_min(timer *timer) {
  * @arg timer The timer to query
  * @return The mean value
  */
-double timer_mean(timer *timer) {
-    return (timer->count) ? timer->sum / timer->count : 0;
+double timer_mean(timer * timer)
+{
+	return (timer->count) ? timer->sum / timer->count : 0;
 }
 
 /**
@@ -89,11 +97,13 @@ double timer_mean(timer *timer) {
  * @arg timer The timer to query
  * @return The sample standard deviation
  */
-double timer_stddev(timer *timer) {
-    double num = (timer->count * timer->squared_sum) - pow(timer->sum, 2);
-    double div = timer->count * (timer->count - 1);
-    if (div == 0) return 0;
-    return sqrt(num / div);
+double timer_stddev(timer * timer)
+{
+	double num = (timer->count * timer->squared_sum) - pow(timer->sum, 2);
+	double div = timer->count * (timer->count - 1);
+	if (div == 0)
+		return 0;
+	return sqrt(num / div);
 }
 
 /**
@@ -101,8 +111,9 @@ double timer_stddev(timer *timer) {
  * @arg timer The timer to query
  * @return The sum of values
  */
-double timer_sum(timer *timer) {
-    return timer->sum;
+double timer_sum(timer * timer)
+{
+	return timer->sum;
 }
 
 /**
@@ -110,8 +121,9 @@ double timer_sum(timer *timer) {
  * @arg timer The timer to query
  * @return The sum squared of values
  */
-double timer_squared_sum(timer *timer) {
-    return timer->squared_sum;
+double timer_squared_sum(timer * timer)
+{
+	return timer->squared_sum;
 }
 
 /**
@@ -119,20 +131,23 @@ double timer_squared_sum(timer *timer) {
  * @arg timer The timer to query
  * @return The maximum value
  */
-double timer_max(timer *timer) {
-    finalize_timer(timer);
-    if (!timer->cm.end) return 0;
-    return timer->cm.end->value;
+double timer_max(timer * timer)
+{
+	finalize_timer(timer);
+	if (!timer->cm.end)
+		return 0;
+	return timer->cm.end->value;
 }
 
 // Finalizes the timer for queries
-static void finalize_timer(timer *timer) {
-    if (timer->finalized) return;
+static void finalize_timer(timer * timer)
+{
+	if (timer->finalized)
+		return;
 
-    // Force the quantile to flush internal
-    // buffers so that queries are accurate.
-    cm_flush(&timer->cm);
+	// Force the quantile to flush internal
+	// buffers so that queries are accurate.
+	cm_flush(&timer->cm);
 
-    timer->finalized = 1;
+	timer->finalized = 1;
 }
-
