@@ -78,8 +78,8 @@ int destroy_metrics(metrics * m)
 	free(m->quantiles);
 
 	// Nuke all the k/v pairs
-	key_val *current = m->kv_vals;
-	key_val *prev = NULL;
+	struct key_val *current = m->kv_vals;
+	struct key_val *prev = NULL;
 	while (current) {
 		free(current->name);
 		prev = current;
@@ -180,7 +180,7 @@ static int metrics_add_timer_sample(metrics * m, char *name, double val)
  */
 static int metrics_add_kv(metrics * m, char *name, double val)
 {
-	key_val *kv = malloc(sizeof(key_val));
+	struct key_val *kv = malloc(sizeof(struct key_val));
 	kv->name = strdup(name);
 	kv->val = val;
 	kv->next = m->kv_vals;
@@ -280,7 +280,7 @@ int metrics_set_update(metrics * m, char *name, char *value)
 int metrics_iter(metrics * m, void *data, metric_callback cb)
 {
 	// Handle the K/V pairs first
-	key_val *current = m->kv_vals;
+	struct key_val *current = m->kv_vals;
 	int should_break = 0;
 	while (current && !should_break) {
 		should_break = cb(data, METRIC_TYPE_KEY_VAL, current->name, &current->val);

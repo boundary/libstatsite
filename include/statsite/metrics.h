@@ -18,11 +18,11 @@ enum metric_type {
 	METRIC_TYPE_GAUGE_DELTA
 } metric_type;
 
-typedef struct key_val {
+struct key_val {
 	char *name;
 	double val;
 	struct key_val *next;
-} key_val;
+};
 
 typedef struct {
 	timer tm;
@@ -39,16 +39,16 @@ typedef struct {
 } gauge_t;
 
 typedef struct {
-	hashmap *counters;			// Hashmap of name -> counter structs
-	hashmap *timers;			// Map of name -> timer_hist structs
-	hashmap *sets;				// Map of name -> set_t structs
-	hashmap *gauges;			// Map of name -> guage struct
-	key_val *kv_vals;			// Linked list of key_val structs
-	double timer_eps;			// The error for timers
-	double *quantiles;			// Array of quantiles
-	uint32_t num_quants;		// Size of quantiles array
-	radix_tree *histograms;		// Radix tree with histogram configs
-	unsigned char set_precision;	// The precision for sets
+	hashmap *counters;           // Hashmap of name -> counter structs
+	hashmap *timers;             // Map of name -> timer_hist structs
+	hashmap *sets;               // Map of name -> set_t structs
+	hashmap *gauges;             // Map of name -> guage struct
+	struct key_val *kv_vals;     // Linked list of key_val structs
+	double timer_eps;            // The error for timers
+	double *quantiles;           // Array of quantiles
+	uint32_t num_quants;         // Size of quantiles array
+	radix_tree *histograms;      // Radix tree with histogram configs
+	unsigned char set_precision; // The precision for sets
 } metrics;
 
 typedef int (*metric_callback) (void *data, enum metric_type type, char *name, void *val);
