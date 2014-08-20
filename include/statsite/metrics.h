@@ -9,14 +9,14 @@
 #include "set.h"
 
 enum metric_type {
-	METRIC_TYPE_UNKNOWN,
-	METRIC_TYPE_KEY_VAL,
-	METRIC_TYPE_GAUGE,
-	METRIC_TYPE_COUNTER,
-	METRIC_TYPE_TIMER,
-	METRIC_TYPE_SET,
-	METRIC_TYPE_GAUGE_DELTA
-} metric_type;
+	metric_type_UNKNOWN       = 0,
+	metric_type_KEY_VAL       = 1,
+	metric_type_COUNTER       = 2,
+	metric_type_TIMER         = 3,
+	metric_type_SET           = 4,
+	metric_type_GAUGE         = 5,
+	metric_type_GAUGE_DELTA   = 6,
+};
 
 struct key_val {
 	char *name;

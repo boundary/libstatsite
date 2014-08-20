@@ -227,19 +227,19 @@ int metrics_set_gauge(struct metrics * m, char *name, double val, bool delta, ui
 int metrics_add_sample(struct metrics * m, enum metric_type type, char *name, double val)
 {
 	switch (type) {
-	case METRIC_TYPE_KEY_VAL:
+	case metric_type_KEY_VAL:
 		return metrics_add_kv(m, name, val);
 
-	case METRIC_TYPE_GAUGE:
+	case metric_type_GAUGE:
 		return metrics_set_gauge(m, name, val, false, 0);
 
-	case METRIC_TYPE_GAUGE_DELTA:
+	case metric_type_GAUGE_DELTA:
 		return metrics_set_gauge(m, name, val, true, 0);
 
-	case METRIC_TYPE_COUNTER:
+	case metric_type_COUNTER:
 		return metrics_increment_counter(m, name, val);
 
-	case METRIC_TYPE_TIMER:
+	case metric_type_TIMER:
 		return metrics_add_timer_sample(m, name, val);
 
 	default:
@@ -284,14 +284,14 @@ int metrics_iter(struct metrics * m, void *data, metric_callback cb)
 	struct key_val *current = m->kv_vals;
 	int should_break = 0;
 	while (current && !should_break) {
-		should_break = cb(data, METRIC_TYPE_KEY_VAL, current->name, &current->val);
+		should_break = cb(data, metric_type_KEY_VAL, current->name, &current->val);
 		current = current->next;
 	}
 	if (should_break)
 		return should_break;
 
 	// Store our data in a small struct
-	struct cb_info info = { METRIC_TYPE_COUNTER, data, cb };
+	struct cb_info info = { metric_type_COUNTER, data, cb };
 
 	// Send the counters
 	should_break = hashmap_iter(m->counters, iter_cb, &info);
@@ -299,19 +299,19 @@ int metrics_iter(struct metrics * m, void *data, metric_callback cb)
 		return should_break;
 
 	// Send the timers
-	info.type = METRIC_TYPE_TIMER;
+	info.type = metric_type_TIMER;
 	should_break = hashmap_iter(m->timers, iter_cb, &info);
 	if (should_break)
 		return should_break;
 
 	// Send the gauges
-	info.type = METRIC_TYPE_GAUGE;
+	info.type = metric_type_GAUGE;
 	should_break = hashmap_iter(m->gauges, iter_cb, &info);
 	if (should_break)
 		return should_break;
 
 	// Send the sets
-	info.type = METRIC_TYPE_SET;
+	info.type = metric_type_SET;
 	should_break = hashmap_iter(m->sets, iter_cb, &info);
 
 	return should_break;
