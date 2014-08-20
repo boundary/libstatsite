@@ -8,23 +8,23 @@
  * @arg tree The tree to initialize
  * @return 0 on success
  */
-int radix_init(radix_tree * tree)
+int radix_init(struct radix_tree * tree)
 {
-	memset(tree, 0, sizeof(radix_tree));
+	memset(tree, 0, sizeof(struct radix_tree));
 	return 0;
 }
 
 // Recursively destroys the radix tree
-static void recursive_destroy(radix_node * n)
+static void recursive_destroy(struct radix_node * n)
 {
-	radix_node *child;
+	struct radix_node *child;
 	if (n->edges[0]) {
-		radix_leaf *leaf = n->edges[0];
+		struct radix_leaf *leaf = n->edges[0];
 		free(leaf->key);
 		free(leaf);
 	}
 	for (int i = 1; i < 256; i++) {
-		child = (radix_node *) n->edges[i];
+		child = (struct radix_node *) n->edges[i];
 		if (!child)
 			continue;
 		recursive_destroy(child);
@@ -37,7 +37,7 @@ static void recursive_destroy(radix_node * n)
  * @arg tree The tree to destroy
  * @return 0 on success
  */
-int radix_destroy(radix_tree * tree)
+int radix_destroy(struct radix_tree * tree)
 {
 	recursive_destroy(&tree->root);
 	return 0;
@@ -62,10 +62,10 @@ static int longest_prefix(char *k1, char *k2, int max)
  * by the value that was updated if any
  * @return 0 if the value was inserted, 1 if the value was updated.
  */
-int radix_insert(radix_tree * t, char *key, void **value)
+int radix_insert(struct radix_tree * t, char *key, void **value)
 {
-	radix_node *child, *parent = NULL, *n = &t->root;
-	radix_leaf *leaf;
+	struct radix_node *child, *parent = NULL, *n = &t->root;
+	struct radix_leaf *leaf;
 	char *search = key;
 	int common_prefix;
 	do {
@@ -80,7 +80,7 @@ int radix_insert(radix_tree * t, char *key, void **value)
 				return 1;
 			} else {
 				// Add a new node
-				leaf = malloc(sizeof(radix_leaf));
+				leaf = malloc(sizeof(struct radix_leaf));
 				n->edges[0] = leaf;
 				leaf->key = key ? strdup(key) : NULL;
 				leaf->value = *value;
@@ -91,8 +91,8 @@ int radix_insert(radix_tree * t, char *key, void **value)
 		parent = n;
 		n = n->edges[(int)*search];
 		if (!n) {
-			child = parent->edges[(int)*search] = calloc(1, sizeof(radix_node));
-			leaf = child->edges[0] = malloc(sizeof(radix_leaf));
+			child = parent->edges[(int)*search] = calloc(1, sizeof(struct radix_node));
+			leaf = child->edges[0] = malloc(sizeof(struct radix_leaf));
 			leaf->key = strdup(key);
 			leaf->value = *value;
 
@@ -109,7 +109,7 @@ int radix_insert(radix_tree * t, char *key, void **value)
 			// If we share a sub-set, we need to split the nodes
 		} else {
 			// Split the node with the shared prefix
-			child = calloc(1, sizeof(radix_node));
+			child = calloc(1, sizeof(struct radix_node));
 			parent->edges[(int)*search] = child;
 			child->key = n->key;
 			child->key_len = common_prefix;
@@ -120,7 +120,7 @@ int radix_insert(radix_tree * t, char *key, void **value)
 			child->edges[(int)*(n->key)] = n;
 
 			// Create a new leaf
-			leaf = malloc(sizeof(radix_leaf));
+			leaf = malloc(sizeof(struct radix_leaf));
 			leaf->key = strdup(key);
 			leaf->value = *value;
 
@@ -131,7 +131,7 @@ int radix_insert(radix_tree * t, char *key, void **value)
 				return 0;
 			}
 			// Create a new node for the new key
-			n = calloc(1, sizeof(radix_node));
+			n = calloc(1, sizeof(struct radix_node));
 			child->edges[(int)*search] = n;
 			n->edges[0] = leaf;
 
@@ -151,14 +151,14 @@ int radix_insert(radix_tree * t, char *key, void **value)
  * @arg value The value of the key
  * @return 0 if found
  */
-int radix_search(radix_tree * t, char *key, void **value)
+int radix_search(struct radix_tree * t, char *key, void **value)
 {
-	radix_node *n = &t->root;
+	struct radix_node *n = &t->root;
 	char *search = key;
 	do {
 		// Check if we've exhausted the key
 		if (!search || *search == 0) {
-			radix_leaf *l = n->edges[0];
+			struct radix_leaf *l = n->edges[0];
 			if (l) {
 				*value = l->value;
 				return 0;
@@ -186,10 +186,10 @@ int radix_search(radix_tree * t, char *key, void **value)
  * @arg value The value of the key with the longest prefix
  * @return 0 if found
  */
-int radix_longest_prefix(radix_tree * t, char *key, void **value)
+int radix_longest_prefix(struct radix_tree * t, char *key, void **value)
 {
-	radix_node *n = &t->root;
-	radix_leaf *last_match = NULL;
+	struct radix_node *n = &t->root;
+	struct radix_leaf *last_match = NULL;
 	char *search = key;
 	do {
 		// Store the last match
@@ -220,7 +220,7 @@ int radix_longest_prefix(radix_tree * t, char *key, void **value)
 	return 1;
 }
 
-void *radix_longest_prefix_value(radix_tree * t, char *key)
+void *radix_longest_prefix_value(struct radix_tree * t, char *key)
 {
 	void *value = NULL;
 	radix_longest_prefix(t, key, &value);
@@ -228,17 +228,17 @@ void *radix_longest_prefix_value(radix_tree * t, char *key)
 }
 
 // Recursively iterates
-static int recursive_iter(radix_node * n, void *data, int (*iter_func) (void *data, char *key,
+static int recursive_iter(struct radix_node * n, void *data, int (*iter_func) (void *data, char *key,
 		void *value))
 {
 	int ret = 0;
 	if (n->edges[0]) {
-		radix_leaf *leaf = n->edges[0];
+		struct radix_leaf *leaf = n->edges[0];
 		ret = iter_func(data, leaf->key, leaf->value);
 	}
-	radix_node *child;
+	struct radix_node *child;
 	for (int i = 1; !ret && i < 256; i++) {
-		child = (radix_node *) n->edges[i];
+		child = (struct radix_node *) n->edges[i];
 		if (!child)
 			continue;
 		ret = recursive_iter(child, data, iter_func);
@@ -253,7 +253,7 @@ static int recursive_iter(radix_node * n, void *data, int (*iter_func) (void *da
  * non-zero to stop iteration.
  * @return 0 on sucess. 1 if the iteration was stopped.
  */
-int radix_foreach(radix_tree * t, void *data, int (*iter_func) (void *data, char *key, void *value))
+int radix_foreach(struct radix_tree * t, void *data, int (*iter_func) (void *data, char *key, void *value))
 {
 	return recursive_iter(&t->root, data, iter_func);
 }

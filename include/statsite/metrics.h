@@ -39,16 +39,16 @@ struct gauge {
 };
 
 struct metrics {
-	struct hashmap *counters;    // Hashmap of name -> counter structs
-	struct hashmap *timers;      // Map of name -> timer_hist structs
-	struct hashmap *sets;        // Map of name -> set_t structs
-	struct hashmap *gauges;      // Map of name -> guage struct
-	struct key_val *kv_vals;     // Linked list of key_val structs
-	double timer_eps;            // The error for timers
-	double *quantiles;           // Array of quantiles
-	uint32_t num_quants;         // Size of quantiles array
-	radix_tree *histograms;      // Radix tree with histogram configs
-	unsigned char set_precision; // The precision for sets
+	struct hashmap *counters;      // Hashmap of name -> counter structs
+	struct hashmap *timers;        // Map of name -> timer_hist structs
+	struct hashmap *sets;          // Map of name -> set_t structs
+	struct hashmap *gauges;        // Map of name -> guage struct
+	struct key_val *kv_vals;       // Linked list of key_val structs
+	double timer_eps;              // The error for timers
+	double *quantiles;             // Array of quantiles
+	uint32_t num_quants;           // Size of quantiles array
+	struct radix_tree *histograms; // Radix tree with histogram configs
+	unsigned char set_precision;   // The precision for sets
 };
 
 typedef int (*metric_callback) (void *data, enum metric_type type, char *name, void *val);
@@ -63,8 +63,9 @@ typedef int (*metric_callback) (void *data, enum metric_type type, char *name, v
  * @arg set_precision The precision to use for sets
  * @return 0 on success.
  */
-int init_metrics(double timer_eps, double *quantiles, uint32_t num_quants, radix_tree * histograms,
-	unsigned char set_precision, struct metrics * m);
+int init_metrics(double timer_eps, double *quantiles, uint32_t num_quants,
+		struct radix_tree * histograms, unsigned char set_precision,
+		struct metrics * m);
 
 /**
  * Initializes the metrics struct, with preset configurations.

@@ -25,8 +25,9 @@ struct cb_info {
  * @arg set_precision The precision to use for sets
  * @return 0 on success.
  */
-int init_metrics(double timer_eps, double *quantiles, uint32_t num_quants, radix_tree * histograms,
-	unsigned char set_precision, struct metrics * m)
+int init_metrics(double timer_eps, double *quantiles, uint32_t num_quants,
+		struct radix_tree * histograms, unsigned char set_precision,
+		struct metrics * m)
 {
 	// Copy the inputs
 	m->timer_eps = timer_eps;
