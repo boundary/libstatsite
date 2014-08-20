@@ -26,7 +26,7 @@ struct cb_info {
  * @return 0 on success.
  */
 int init_metrics(double timer_eps, double *quantiles, uint32_t num_quants, radix_tree * histograms,
-	unsigned char set_precision, metrics * m)
+	unsigned char set_precision, struct metrics * m)
 {
 	// Copy the inputs
 	m->timer_eps = timer_eps;
@@ -62,7 +62,7 @@ int init_metrics(double timer_eps, double *quantiles, uint32_t num_quants, radix
  * precision is 12 (2% variance).
  * @return 0 on success.
  */
-int init_metrics_defaults(metrics * m)
+int init_metrics_defaults(struct metrics * m)
 {
 	double quants[] = { 0.5, 0.95, 0.99 };
 	return init_metrics(0.01, (double *)&quants, 3, NULL, 12, m);
@@ -72,7 +72,7 @@ int init_metrics_defaults(metrics * m)
  * Destroys the metrics
  * @return 0 on success.
  */
-int destroy_metrics(metrics * m)
+int destroy_metrics(struct metrics * m)
 {
 	// Clear the copied quantiles array
 	free(m->quantiles);
@@ -113,7 +113,7 @@ int destroy_metrics(metrics * m)
  * @arg val The value to add
  * @return 0 on success
  */
-static int metrics_increment_counter(metrics * m, char *name, double val)
+static int metrics_increment_counter(struct metrics * m, char *name, double val)
 {
 	struct counter *c = hashmap_get_value(m->counters, name);
 
@@ -134,7 +134,7 @@ static int metrics_increment_counter(metrics * m, char *name, double val)
  * @arg val The sample to add
  * @return 0 on success.
  */
-static int metrics_add_timer_sample(metrics * m, char *name, double val)
+static int metrics_add_timer_sample(struct metrics * m, char *name, double val)
 {
 	histogram_config *conf;
 	struct timer_hist *t = hashmap_get_value(m->timers, name);
@@ -178,7 +178,7 @@ static int metrics_add_timer_sample(metrics * m, char *name, double val)
  * @arg val The value associated
  * @return 0 on success.
  */
-static int metrics_add_kv(metrics * m, char *name, double val)
+static int metrics_add_kv(struct metrics * m, char *name, double val)
 {
 	struct key_val *kv = malloc(sizeof(struct key_val));
 	kv->name = strdup(name);
@@ -195,7 +195,7 @@ static int metrics_add_kv(metrics * m, char *name, double val)
  * @arg delta Is this a delta update
  * @return 0 on success
  */
-int metrics_set_gauge(metrics * m, char *name, double val, bool delta, uint64_t user)
+int metrics_set_gauge(struct metrics * m, char *name, double val, bool delta, uint64_t user)
 {
 	struct gauge *g = hashmap_get_value(m->gauges, name);
 
@@ -223,7 +223,7 @@ int metrics_set_gauge(metrics * m, char *name, double val, bool delta, uint64_t 
  * @arg val The sample to add
  * @return 0 on success.
  */
-int metrics_add_sample(metrics * m, enum metric_type type, char *name, double val)
+int metrics_add_sample(struct metrics * m, enum metric_type type, char *name, double val)
 {
 	switch (type) {
 	case METRIC_TYPE_KEY_VAL:
@@ -252,7 +252,7 @@ int metrics_add_sample(metrics * m, enum metric_type type, char *name, double va
  * @arg value The value to add
  * @return 0 on success
  */
-int metrics_set_update(metrics * m, char *name, char *value)
+int metrics_set_update(struct metrics * m, char *name, char *value)
 {
 	set_t *s = hashmap_get_value(m->sets, name);
 
@@ -277,7 +277,7 @@ int metrics_set_update(metrics * m, char *name, char *value)
  * a pointer to a timer. Return non-zero to stop iteration.
  * @return 0 on success, or the return of the callback
  */
-int metrics_iter(metrics * m, void *data, metric_callback cb)
+int metrics_iter(struct metrics * m, void *data, metric_callback cb)
 {
 	// Handle the K/V pairs first
 	struct key_val *current = m->kv_vals;
