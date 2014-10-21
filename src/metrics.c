@@ -190,13 +190,14 @@ static int metrics_add_kv(struct metrics * m, char *name, double val)
 }
 
 /**
- * Sets a guage value
+ * Sets a gauge value
  * @arg name The name of the gauge
  * @arg val The value to set
  * @arg delta Is this a delta update
+ * @arg timestamp_ms User-specified timestamp in milliseconds
  * @return 0 on success
  */
-int metrics_set_gauge(struct metrics * m, char *name, double val, bool delta, uint64_t user)
+int metrics_set_gauge_ts(struct metrics * m, char *name, double val, bool delta, uint64_t user, uint64_t timestamp_ms)
 {
 	struct gauge *g = hashmap_get_value(m->gauges, name);
 
@@ -208,6 +209,7 @@ int metrics_set_gauge(struct metrics * m, char *name, double val, bool delta, ui
 	}
 
 	g->user = user;
+	g->timestamp_ms = timestamp_ms;
 	g->prev_value = g->value;
 	if (delta) {
 		g->value += val;
@@ -215,6 +217,18 @@ int metrics_set_gauge(struct metrics * m, char *name, double val, bool delta, ui
 		g->value = val;
 	}
 	return 0;
+}
+
+/**
+ * Sets a guage value
+ * @arg name The name of the gauge
+ * @arg val The value to set
+ * @arg delta Is this a delta update
+ * @return 0 on success
+ */
+int metrics_set_gauge(struct metrics * m, char *name, double val, bool delta, uint64_t user)
+{
+	return metrics_set_gauge_ts(m, name, val, delta, user, 0);
 }
 
 /**

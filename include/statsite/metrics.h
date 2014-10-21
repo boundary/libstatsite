@@ -36,6 +36,7 @@ struct gauge {
 	double value;
 	double prev_value;
 	uint64_t user;
+	uint64_t timestamp_ms;
 };
 
 struct metrics {
@@ -99,6 +100,17 @@ int metrics_add_sample(struct metrics * m, enum metric_type type, char *name, do
  * @return 0 on success.
  */
 int metrics_set_gauge(struct metrics * m, char *name, double val, bool delta, uint64_t user);
+
+/**
+ * Adds a new gauge value
+ * @arg name The name of the metric
+ * @arg val The sample to add
+ * @arg delta is this a GAUGE or GAUGE_DELTA
+ * @arg meta User-specified metadata
+ * @arg timestamp_ms User-specified timestamp in milliseconds
+ * @return 0 on success.
+ */
+int metrics_set_gauge_ts(struct metrics * m, char *name, double val, bool delta, uint64_t user, uint64_t timestamp_ms);
 
 /**
  * Adds a value to a named set.
