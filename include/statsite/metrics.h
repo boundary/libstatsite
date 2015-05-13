@@ -36,6 +36,7 @@ struct gauge {
 	double value;
 	double prev_value;
 	uint64_t user;
+	uint64_t user_flags;
 	uint64_t timestamp_ms;
 };
 
