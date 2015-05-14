@@ -216,6 +216,9 @@ int metrics_set_gauge_ts(struct metrics * m, char *name, double val, bool delta,
 	} else {
 		g->value = val;
 	}
+
+	g->user_flags = 0;
+
 	return 0;
 }
 
