@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 struct counter {
+	uint64_t actual_count;		// Actual items received
 	uint64_t count;				// Count of items
 	double sum;					// Sum of the values
 	double squared_sum;			// Sum of the squared values
@@ -23,7 +24,7 @@ int init_counter(struct counter *counter);
  * @arg sample The new sample value
  * @return 0 on success.
  */
-int counter_add_sample(struct counter *counter, double sample);
+int counter_add_sample(struct counter *counter, double sample, double sample_rate);
 
 /**
  * Returns the number of samples in the counter

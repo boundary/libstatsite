@@ -8,6 +8,7 @@
  */
 int init_counter(struct counter *counter)
 {
+	counter->actual_count = 0;
 	counter->count = 0;
 	counter->sum = 0;
 	counter->squared_sum = 0;
@@ -22,7 +23,7 @@ int init_counter(struct counter *counter)
  * @arg sample The new sample value
  * @return 0 on success.
  */
-int counter_add_sample(struct counter *counter, double sample)
+int counter_add_sample(struct counter *counter, double sample, double sample_rate)
 {
 	if (counter->count == 0) {
 		counter->min = counter->max = sample;
@@ -32,7 +33,8 @@ int counter_add_sample(struct counter *counter, double sample)
 		else if (counter->max < sample)
 			counter->max = sample;
 	}
-	counter->count++;
+	counter->actual_count += 1;
+	counter->count += (1 / sample_rate);
 	counter->sum += sample;
 	counter->squared_sum += pow(sample, 2);
 	return 0;
@@ -55,7 +57,7 @@ uint64_t counter_count(struct counter * counter)
  */
 double counter_mean(struct counter *counter)
 {
-	return (counter->count) ? counter->sum / counter->count : 0;
+	return (counter->actual_count) ? counter->sum / counter->actual_count : 0;
 }
 
 /**
@@ -65,8 +67,8 @@ double counter_mean(struct counter *counter)
  */
 double counter_stddev(struct counter *counter)
 {
-	double num = (counter->count * counter->squared_sum) - pow(counter->sum, 2);
-	double div = counter->count * (counter->count - 1);
+	double num = (counter->actual_count * counter->squared_sum) - pow(counter->sum, 2);
+	double div = counter->actual_count * (counter->actual_count - 1);
 	if (div == 0)
 		return 0;
 	return sqrt(num / div);
