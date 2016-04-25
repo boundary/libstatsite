@@ -14,6 +14,7 @@ static void finalize_timer(timer * timer);
  */
 int init_timer(double eps, double *quantiles, uint32_t num_quants, timer * timer)
 {
+	timer->actual_count = 0;
 	timer->count = 0;
 	timer->sum = 0;
 	timer->squared_sum = 0;
@@ -38,9 +39,10 @@ int destroy_timer(timer * timer)
  * @arg sample The new sample value
  * @return 0 on success.
  */
-int timer_add_sample(timer * timer, double sample)
+int timer_add_sample(timer * timer, double sample, double sample_rate)
 {
-	timer->count += 1;
+	timer->actual_count += 1;
+	timer->count += (1 / sample_rate);
 	timer->sum += sample;
 	timer->squared_sum += pow(sample, 2);
 	timer->finalized = 0;
@@ -89,7 +91,7 @@ double timer_min(timer * timer)
  */
 double timer_mean(timer * timer)
 {
-	return (timer->count) ? timer->sum / timer->count : 0;
+	return (timer->actual_count) ? timer->sum / timer->actual_count : 0;
 }
 
 /**
@@ -99,8 +101,8 @@ double timer_mean(timer * timer)
  */
 double timer_stddev(timer * timer)
 {
-	double num = (timer->count * timer->squared_sum) - pow(timer->sum, 2);
-	double div = timer->count * (timer->count - 1);
+	double num = (timer->actual_count * timer->squared_sum) - pow(timer->sum, 2);
+	double div = timer->actual_count * (timer->actual_count - 1);
 	if (div == 0)
 		return 0;
 	return sqrt(num / div);
