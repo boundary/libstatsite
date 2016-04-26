@@ -84,6 +84,12 @@ int init_metrics_defaults(struct metrics * m);
 int destroy_metrics(struct metrics * m);
 
 /**
+ * Clear the metrics counters hash
+ * @return 0 on success.
+ */
+int metrics_clear_hash(struct metrics * m, enum metric_type metric_type);
+
+/**
  * Adds a new sampled value
  * @arg type The type of the metrics
  * @arg name The name of the metric
