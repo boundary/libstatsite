@@ -96,7 +96,7 @@ int destroy_metrics(struct metrics * m)
 	hashmap_iter(m->timers, timer_delete_cb, NULL);
 	hashmap_destroy(m->timers);
 
-	// Nuke the timers
+	// Nuke the sets
 	hashmap_iter(m->sets, set_delete_cb, NULL);
 	hashmap_destroy(m->sets);
 
@@ -105,6 +105,31 @@ int destroy_metrics(struct metrics * m)
 	hashmap_destroy(m->gauges);
 
 	return 0;
+}
+
+int metrics_clear_hash(struct metrics * m, enum metric_type metric_type)
+{
+	int rc = 0;
+
+	switch (metric_type) {
+		case metric_type_GAUGE:
+		case metric_type_GAUGE_DELTA:
+			hashmap_clear(m->gauges);
+			break;
+		case metric_type_COUNTER:
+			hashmap_clear(m->counters);
+			break;
+		case metric_type_TIMER:
+			hashmap_clear(m->timers);
+			break;
+		case metric_type_SET:
+			hashmap_clear(m->sets);
+			break;
+		default:
+			rc = -1;
+			break;
+	}
+	return rc;
 }
 
 /**
