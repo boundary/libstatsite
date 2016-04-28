@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdbool.h>
 #include "hll.h"
 
 #ifndef SET_H
@@ -28,6 +29,7 @@ typedef struct {
 		hll_t h;
 		exact_set s;
 	} store;
+	bool reset;
 } set_t;
 
 /**
@@ -57,5 +59,11 @@ void set_add(set_t * s, char *key);
  * @return The size of the set.
  */
 uint64_t set_size(set_t * s);
+
+/**
+ * Reset a set, but retain the last count.
+ * @arg s The set
+ */
+void set_reset(set_t *s);
 
 #endif
