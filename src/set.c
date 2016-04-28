@@ -4,6 +4,14 @@
 #include <strings.h>
 #include "set.h"
 
+/*
+ * The set code has been updated to mimic the behaviour in collectd/statsd.
+ * Each push interval will provide the current count.  The set_reset function
+ * will free the memory, but allow the last count to be accessed.   In the event
+ * that no new data arrives, the old value will be pushed.   If a new set update
+ * arrives, the old value is discarded and the set "restarts"
+ */
+
 // Link the external murmur hash in
 extern void MurmurHash3_x64_128(const void *key, const int len, const uint32_t seed, void *out);
 
@@ -19,6 +27,7 @@ int set_init(unsigned char precision, set_t * s)
 	s->type = EXACT;
 	s->store.s.precision = precision;
 	s->store.s.count = 0;
+	s->reset = false;
 	s->store.s.hashes = (uint64_t *) malloc(sizeof(uint64_t) * SET_MAX_EXACT);
 	if (!s->store.s.hashes)
 		return 1;
@@ -74,6 +83,9 @@ void set_add(set_t * s, char *key)
 {
 	uint32_t i;
 	uint64_t out[2];
+	if (s->reset) {
+		set_init(s->store.s.precision, s);
+	}
 	MurmurHash3_x64_128(key, strlen(key), 0, &out);
 	switch (s->type) {
 	case EXACT:
@@ -107,6 +119,11 @@ void set_add(set_t * s, char *key)
  */
 uint64_t set_size(set_t * s)
 {
+
+	if (s->reset) {
+		return s->store.s.count;
+	}
+
 	switch (s->type) {
 	case EXACT:
 		return s->store.s.count;
@@ -117,4 +134,19 @@ uint64_t set_size(set_t * s)
 	default:
 		abort();
 	}
+}
+
+/**
+ * Reset a set, but retain the last count.
+ * @arg s The set
+ */
+void set_reset(set_t *s) {
+
+	if (s->reset) {
+		return;
+	}
+
+	s->store.s.count = set_size(s);
+	set_destroy(s);
+	s->reset = true;
 }
