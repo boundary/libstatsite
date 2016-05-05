@@ -94,4 +94,6 @@ double timer_squared_sum(timer * timer);
  */
 double timer_max(timer * timer);
 
+void reset_timer(double eps, double *quantiles, uint32_t num_quants, timer *timer);
+
 #endif
