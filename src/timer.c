@@ -153,3 +153,13 @@ static void finalize_timer(timer * timer)
 
 	timer->finalized = 1;
 }
+
+void reset_timer(double eps, double *quantiles, uint32_t num_quants, timer *timer)
+{
+	if (!timer) {
+		return;
+	}
+
+	destroy_timer(timer);
+	init_timer(eps, quantiles, num_quants, timer);
+}
