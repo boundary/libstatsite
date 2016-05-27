@@ -27,7 +27,7 @@ struct cb_info {
  */
 int init_metrics(double timer_eps, double *quantiles, uint32_t num_quants,
 		struct radix_tree * histograms, unsigned char set_precision,
-		struct metrics * m)
+		uint64_t set_max_exact, struct metrics * m)
 {
 	// Copy the inputs
 	m->timer_eps = timer_eps;
@@ -36,6 +36,7 @@ int init_metrics(double timer_eps, double *quantiles, uint32_t num_quants,
 	memcpy(m->quantiles, quantiles, num_quants * sizeof(double));
 	m->histograms = histograms;
 	m->set_precision = set_precision;
+	m->set_max_exact = set_max_exact;
 
 	// Allocate the hashmaps
 	int res = hashmap_init(0, &m->counters);
@@ -66,7 +67,7 @@ int init_metrics(double timer_eps, double *quantiles, uint32_t num_quants,
 int init_metrics_defaults(struct metrics * m)
 {
 	double quants[] = { 0.5, 0.95, 0.99 };
-	return init_metrics(0.01, (double *)&quants, 3, NULL, 12, m);
+	return init_metrics(0.01, (double *)&quants, 3, NULL, 12, 0, m);
 }
 
 /**
@@ -302,7 +303,7 @@ int metrics_set_update(struct metrics * m, char *name, char *value)
 	// New set
 	if (!s) {
 		s = malloc(sizeof(set_t));
-		set_init(m->set_precision, s);
+		set_init(m->set_precision, s, m->set_max_exact);
 		hashmap_put(m->sets, name, s);
 	}
 	// Add the sample value

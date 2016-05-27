@@ -21,14 +21,19 @@ extern void MurmurHash3_x64_128(const void *key, const int len, const uint32_t s
  * @arg s The set to initialize
  * @return 0 on success.
  */
-int set_init(unsigned char precision, set_t * s)
+int set_init(unsigned char precision, set_t * s, uint64_t set_max_exact)
 {
 	// Initialize as an exact set
 	s->type = EXACT;
+	if (set_max_exact == 0) {
+		s->exact_size = SET_MAX_EXACT;
+	} else {
+		s->exact_size = set_max_exact;
+	}
 	s->store.s.precision = precision;
 	s->store.s.count = 0;
 	s->reset = false;
-	s->store.s.hashes = (uint64_t *) malloc(sizeof(uint64_t) * SET_MAX_EXACT);
+	s->store.s.hashes = (uint64_t *) malloc(sizeof(uint64_t) * s->exact_size);
 	if (!s->store.s.hashes)
 		return 1;
 	return 0;
@@ -66,7 +71,7 @@ static void convert_exact_to_approx(set_t * s)
 	hll_init(s->store.s.precision, &s->store.h);
 
 	// Add each hash to the HLL
-	for (int i = 0; i < SET_MAX_EXACT; i++) {
+	for (int i = 0; i < s->exact_size; i++) {
 		hll_add_hash(&s->store.h, hashes[i]);
 	}
 
@@ -84,7 +89,7 @@ void set_add(set_t * s, char *key)
 	uint32_t i;
 	uint64_t out[2];
 	if (s->reset) {
-		set_init(s->store.s.precision, s);
+		set_init(s->store.s.precision, s, s->exact_size);
 	}
 	MurmurHash3_x64_128(key, strlen(key), 0, &out);
 	switch (s->type) {
@@ -96,7 +101,7 @@ void set_add(set_t * s, char *key)
 		}
 
 		// Check if we can fit this in the array
-		if (i < SET_MAX_EXACT) {
+		if (i < s->exact_size) {
 			s->store.s.hashes[i] = out[1];
 			s->store.s.count++;
 			return;
@@ -147,6 +152,21 @@ void set_reset(set_t *s) {
 	}
 
 	s->store.s.count = set_size(s);
+	set_destroy(s);
+	s->reset = true;
+}
+
+/**
+ * Reset a set, but retain it and set the last count to 0.
+ * @arg s The set
+ */
+void set_reset_to_zero(set_t *s) {
+
+	if (s->reset) {
+		return;
+	}
+
+	s->store.s.count = 0;
 	set_destroy(s);
 	s->reset = true;
 }

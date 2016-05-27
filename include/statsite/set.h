@@ -30,6 +30,7 @@ typedef struct {
 		exact_set s;
 	} store;
 	bool reset;
+	uint64_t exact_size;
 } set_t;
 
 /**
@@ -38,7 +39,7 @@ typedef struct {
  * @arg s The set to initialize
  * @return 0 on success.
  */
-int set_init(unsigned char precision, set_t * s);
+int set_init(unsigned char precision, set_t * s, uint64_t set_max_exact);
 
 /**
  * Destroys the set
@@ -65,5 +66,11 @@ uint64_t set_size(set_t * s);
  * @arg s The set
  */
 void set_reset(set_t *s);
+
+/**
+ * Reset a set, but retain the set with a 0 value.
+ * @arg s The set
+ */
+void set_reset_to_zero(set_t *s);
 
 #endif
