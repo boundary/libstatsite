@@ -51,6 +51,7 @@ struct metrics {
 	uint32_t num_quants;           // Size of quantiles array
 	struct radix_tree *histograms; // Radix tree with histogram configs
 	unsigned char set_precision;   // The precision for sets
+	uint64_t set_max_exact;        // The max exact size for sets
 };
 
 typedef int (*metric_callback) (void *data, enum metric_type type, char *name, void *val);
@@ -67,7 +68,7 @@ typedef int (*metric_callback) (void *data, enum metric_type type, char *name, v
  */
 int init_metrics(double timer_eps, double *quantiles, uint32_t num_quants,
 		struct radix_tree * histograms, unsigned char set_precision,
-		struct metrics * m);
+		uint64_t set_max_exact, struct metrics * m);
 
 /**
  * Initializes the metrics struct, with preset configurations.
