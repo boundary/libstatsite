@@ -9,7 +9,7 @@ CFLAGS="$CFLAGS -Wall -Werror -std=c99"
 
 AC_CANONICAL_HOST
 case $host_os in
-	*linux*) CFLAGS="$CFLAGS -Dlinux -D_BSD_SOURCE -D_POSIX_SOURCE -D_GNU_SOURCE" ;;
+	*linux*) CFLAGS="$CFLAGS -Dlinux -D_BSD_SOURCE -D_DEFAULT_SOURCE -D_POSIX_SOURCE -D_GNU_SOURCE" ;;
 	*solaris*) CFLAGS="$CFLAGS -D__EXTENSIONS__" ;;
 	*) ;;
 esac
