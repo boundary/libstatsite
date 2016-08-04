@@ -6,6 +6,12 @@
 *~
 *.swp
 
+# Mac OS garbage
+.DS_Store
+
+# Out-of-tree builds
+build/
+
 # C stuff
 *.o
 
